@@ -1,0 +1,81 @@
+# $Id: more_node_buttons.pot, v 1.2 2009/08/04 12:44:32 quiptime Exp $
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  more_node_buttons.module, v 1.2 2009/08/03 17:06:49 quiptime
+#  more_node_buttons.info, v 1.1 2009/08/03 17:07:30 quiptime
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2009-08-04 12:44+0200\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: more_node_buttons.module:45
+msgid "Manage buttons"
+msgstr ""
+
+#: more_node_buttons.module:52
+msgid "Cancel button"
+msgstr ""
+
+#: more_node_buttons.module:53
+msgid "Additional Cancel button on node edit form."
+msgstr ""
+
+#: more_node_buttons.module:55;67
+msgid "None"
+msgstr ""
+
+#: more_node_buttons.module:56
+msgid "On the left side"
+msgstr ""
+
+#: more_node_buttons.module:57
+msgid "On the right side"
+msgstr ""
+
+#: more_node_buttons.module:64
+msgid "Save and continue button"
+msgstr ""
+
+#: more_node_buttons.module:65
+msgid "Additional Save and continue button on node edit form."
+msgstr ""
+
+#: more_node_buttons.module:68
+msgid "Left of the save button"
+msgstr ""
+
+#: more_node_buttons.module:69
+msgid "Right of the save button"
+msgstr ""
+
+#: more_node_buttons.module:92
+msgid "Save and continue"
+msgstr ""
+
+#: more_node_buttons.module:115
+msgid "Cancel"
+msgstr ""
+
+#: more_node_buttons.info:0
+msgid "More node buttons"
+msgstr ""
+
+#: more_node_buttons.info:0
+msgid "Add an Cancel and an Save and continue button to node edit forms."
+msgstr ""
+
+#: more_node_buttons.info:0
+msgid "Other"
+msgstr ""
+

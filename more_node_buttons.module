@@ -1,0 +1,246 @@
+<?php
+// $Id: more_node_buttons.module, v 1.2 2009/08/03 17:06:49 quiptime Exp $
+
+/**
+ * @file
+ * Add an Cancel and an Save and continue button to node edit forms.
+ */
+
+/**
+ * Implement hook_form_alter().
+ */
+function more_node_buttons_form_alter(&$form, $form_state, $form_id) {
+  if (arg(0) === 'node' && arg(1) === 'add' && arg(2) != '') {
+    $node_type = arg(2);
+  }
+  elseif (isset($form['type']) && arg(0) === 'node' && is_numeric(arg(1)) && arg(2) === 'edit') {
+    $node_type = $form['type']['#value'];
+  }
+  elseif (arg(0) === 'admin' && arg(1) === 'structure' && arg(2) === 'node-type' && arg(3) != '') {
+    $node_type = arg(3);
+  }
+  elseif (arg(0) === 'admin' && arg(1) === 'structure' && arg(2) === 'types' && arg(3) === 'add') {
+    // Use an content type "dummy" to handle button management on "Add content type" page.
+    $node_type = 'dummy';
+
+    // TODO: Better name as dummy, dummy not unique enough.
+  }
+  else {
+    return;
+  }
+
+  switch ($form_id) {
+    case 'node_type_form':
+      if (empty($form['#node_type']->type)) {
+        $type = 'dummy';
+      }
+      else {
+        $type = $form['#node_type']->type;
+      }
+
+      $form['#submit'][] = 'more_node_buttons_admin_form_submit';
+
+      $form['submission']['more_buttons'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Manage buttons'),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      );
+      // Administer Cancel button.
+      $form['submission']['more_buttons']['more_node_buttons_cancel'] = array(
+        '#type' => 'select',
+        '#title' => t('Cancel button'),
+        '#description' => t('Additional Cancel button on node edit form.'),
+        '#options' => array(
+          0 => t('None'),
+          1 => t('On the left side'),
+          2 => t('On the right side'),
+        ),
+        '#default_value' => variable_get('more_node_buttons_cancel_' . $type, 0),
+      );
+      // Administer Save and continue button.
+      $form['submission']['more_buttons']['more_node_buttons_sac'] = array(
+        '#type' => 'select',
+        '#title' => t('Save and continue button'),
+        '#description' => t('Additional Save and continue button on node edit form.'),
+        '#options' => array(
+          0 => t('None'),
+          1 => t('Left of the save button'),
+          2 => t('Right of the save button'),
+        ),
+        '#default_value' => variable_get('more_node_buttons_sac_' . $type, 0),
+      );
+      break;
+
+    case 'node_type_delete_confirm':
+      $form['#submit'][] = 'more_node_buttons_delete_confirm_submit';
+      break;
+
+    case $node_type . '_node_form':
+      // The Save and continue form element.
+      $sac = variable_get('more_node_buttons_sac_' . $node_type, 0);
+
+      if ($sac > 0) {
+        if ($sac == 1) {
+          $weight_sac = $form['buttons']['submit']['#weight'] + 0.075;
+        }
+        elseif ($sac == 2) {
+          $weight_sac = $form['buttons']['submit']['#weight'] + 1.025;
+        }
+        // Define the Save and continue form element.
+        $form['buttons']['sac'] = array(
+          '#type' => 'submit',
+          '#value' => t('Save and continue'),
+          '#access' => TRUE,
+          '#weight' => $weight_sac,
+          '#validate' => array('more_node_buttons_changed_validate'),
+          '#submit' => array( 'node_form_submit','more_node_buttons_sac_submit',),
+        );
+        // Extra validation for the standard buttons.
+        // Without this break the normal form handling.
+        // @see more_node_buttons_cancel_validate() and more_node_buttons_changed_submit()
+        $form['buttons']['preview']['#validate'][] = 'more_node_buttons_changed_validate';
+        $form['buttons']['submit']['#validate'][] = 'more_node_buttons_changed_validate';
+        $form['buttons']['delete']['#validate'][] = 'more_node_buttons_changed_validate';
+        $form['buttons']['preview']['#submit'][] = 'more_node_buttons_changed_submit';
+        $form['buttons']['submit']['#submit'][] = 'more_node_buttons_changed_submit';
+        $form['buttons']['delete']['#submit'][] = 'more_node_buttons_changed_submit';
+      }
+
+      // The Cancel form element.
+      $cancel = variable_get('more_node_buttons_cancel_' . $node_type, 0);
+
+      if ($cancel > 0) {
+        if ($cancel == 1) {
+          $weight_cancel = $form['buttons']['submit']['#weight']++;
+        }
+        elseif ($cancel == 2) {
+          $weight_cancel = 16;
+        }
+        // Define the Cancel form element.
+        $form['buttons']['cancel'] = array(
+          '#type' => 'submit',
+          '#value' => t('Cancel'),
+          '#access' => TRUE,
+          '#weight' => $weight_cancel,
+          '#validate' => array('more_node_buttons_cancel_validate'),
+          '#submit' => array('more_node_buttons_cancel_submit'),
+        );
+      }
+      break;
+  }
+}
+
+/**
+ * Implement hook_form_validate().
+ *
+ * Handle the Cancel button validation.
+ */
+function more_node_buttons_cancel_validate($form, &$form_state) {
+  // No validation required.
+  more_node_buttons_cancel_submit($form, $form_state);
+}
+
+/**
+ * Implement hook_form_validate().
+ *
+ * Skip the function node_last_changed() after clicked Save and continue button.
+ */
+function more_node_buttons_changed_validate($form, &$form_state) {
+  $form['changed']['#default_value'] = 0;
+}
+
+/**
+ * Implement hook_form_submit().
+ */
+function more_node_buttons_changed_submit($form, &$form_state) {
+  if ($form_state['clicked_button']['#id'] == 'edit-preview') {
+    $form_state['redirect'] = FALSE;
+  }
+  elseif ($form_state['clicked_button']['#id'] == 'edit-delete') {
+    drupal_goto('node/' . $form_state['values']['nid'] . '/delete', 'destination=node/' . $form_state['values']['nid'] . '/edit');
+  }
+  elseif ($form_state['clicked_button']['#id'] == 'edit-submit') {
+    drupal_goto('<front>');
+  }
+  else {
+    $form_state['redirect'] = TRUE;
+  }
+}
+
+/**
+ * Implement hook_form_submit().
+ *
+ * Handle the Cancel button action.
+ */
+function more_node_buttons_cancel_submit($form, &$form_state) {
+  // Hide the error messages.
+  drupal_get_messages('error');
+
+  if (arg(0) === 'node' && arg(1) === 'add') {
+    // Limitation:
+    // Exist only one content type this redirect does not work.
+    drupal_goto('node/add');
+  }
+  elseif (arg(0) === 'node' && is_numeric(arg(1)) && arg(2) === 'edit') {
+    drupal_goto('node/' . arg(1));
+  }
+  else {
+    drupal_goto('<front>');
+  }
+}
+
+/**
+ * Implement hook_form_submit().
+ *
+ * Save options from "Add content type" form and administer nodetype form.
+ */
+function more_node_buttons_admin_form_submit($form, &$form_state) {
+  // Handle button management on "Add content type" page.
+  // Delete dummy content type system variable
+  // and set the right content type system variable.
+  //
+  // TODO: Better name as dummy, dummy not unique enough.
+  foreach ($form_state['values'] as $key => $value) {
+    if ($key == 'type') {
+      $type = $value;
+    }
+    if (preg_match("/dummy/", $key)) {
+      // Insert right content type.
+      $new_type = preg_replace("/dummy/", $type, $key);
+      $form_state['values'][$new_type] = $value;
+      // Delete dummy content type.
+      unset($form_state['values'][$key]);
+    }
+  }
+}
+
+/**
+ * Implement hook_form_submit().
+ *
+ * Handle the "Save and continue" button action.
+ */
+function more_node_buttons_sac_submit($form, &$form_state) {
+  // Check exist the destination query string (is meant admin/content).
+  $destination = drupal_get_destination();
+  if (isset($destination)) {
+    $form_state['rebuild'] = TRUE;
+    $form_state['redirect'] = FALSE;
+  }
+  else {
+    drupal_get_messages('error');
+    $form_state['redirect'] = 'node/' . $form_state['nid'] . '/edit';
+  }
+}
+
+/**
+ * Implement hook_form_submit().
+ *
+ * Delete more node buttons content type system variables if content types will be deleted.
+ */
+function more_node_buttons_delete_confirm_submit($form, &$form_state) {
+  foreach ($form_state['args'] as $type) {
+    variable_del('more_node_buttons_cancel_' . $type->type);
+    variable_del('more_node_buttons_sac_' . $type->type);
+  }
+}
