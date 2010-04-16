@@ -1,8 +1,8 @@
-; $Id: more_node_buttons.info, v 1.1 2009/08/03 17:07:30 quiptime Exp $
+; $Id: more_node_buttons.info, v 1.3 2010/04/15 17:51:09 quiptime Exp $
 name = More node buttons
 description = Add an Cancel and an Save and continue button to node edit forms.
 package = Other
 core = 7.x
 files[] = more_node_buttons.module
-version = "7.x-1.x-dev"
+version = "7.x-1.3"
 core = "7.x"

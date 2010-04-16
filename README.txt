@@ -1,4 +1,4 @@
-// $Id: README.txt, more_node_buttons, v 1.1 2009/08/03 11:35:422 quiptime Exp $
+// $Id: README.txt, more_node_buttons, v 1.3 2010/04/15 18:17:53 quiptime Exp $
 ======================================================================================
 
 This module add an Cancel and an Save and continue button to node edit forms.
@@ -14,9 +14,9 @@ admin modules page.
 
 Administration
 --------------------------------------------------------------------------------------
-1. Go to administer content types admin/structure/types and edit a content type.
-   In section "Submission form settings" please choose in "Manage buttons" the
-   option to use the Cancel and the Save and continue button.
+1. Go to administer content types admin/structure/types and edit an content type.
+   In the section "Manage buttons" please choose the option to use the Cancel and the
+   Save and continue button.
 
 Author
 --------------------------------------------------------------------------------------
